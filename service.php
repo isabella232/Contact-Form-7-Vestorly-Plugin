@@ -174,21 +174,22 @@ class WPCF7_Vestorly extends WPCF7_Service {
     public function parse_form_submission( WPCF7_Submission $submission ) {
         $form_data = (array) $submission->get_posted_data(); 
         apply_filters('wpcf7_vestorly_parse_form_tags', $form_data);
-        if ( !isset( $form_data['reader_email'] ) 
-            or ! wpcf7_is_email($form_data['reader_email']) ) {
+        if ( !isset( $form_data[$this->email_tag] ) 
+            or ! wpcf7_is_email($form_data[$this->email_tag]) ) {
            return; 
         }
 
         $user_info = array(
-            'username' => $form_data['reader_email'],
+            'username' => $form_data[$this->email_tag],
         );
 
         if ( isset( $form_data['your-name'] ) ) {
+            $member = array();
             $name = trim( $form_data['your-name'] );
-            $user_info['name'] = $name;
             $parts = explode( " ", $name );
-            $user_info['last_name'] = array_pop( $parts );
-            $user_info['first_name'] = implode( " ", $parts );
+            $member['last_name'] = array_pop( $parts );
+            $member['first_name'] = implode( " ", $parts );
+            $user_info['member'] = $member;
         }
         return $user_info;
     }

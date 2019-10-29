@@ -203,6 +203,7 @@ class WPCF7_Vestorly extends WPCF7_Service {
             $member = array();
             $name = trim( $form_data['your-name'] );
             $parts = explode( " ", $name );
+            $member['email'] = $form_data[$this->email_tag];
             $member['last_name'] = array_pop( $parts );
             $member['first_name'] = implode( " ", $parts );
             $user_info['member'] = $member;
@@ -212,9 +213,9 @@ class WPCF7_Vestorly extends WPCF7_Service {
 
     public function upload_contact(array $post_data) {
         if ( WP_DEBUG ) {
-            $endpoint = 'https://api.oodadev.com/api/v3/reader/sessions';
+            $endpoint = 'https://api.oodadev.com/api/v2/members';
         } else {
-            $endpoint = 'https://api.vestorly.com/api/v3/reader/sessions';
+            $endpoint = 'https://api.vestorly.com/api/v2/members';
         }
 
         $post_data['publisher_id'] = $this->publisher_id;

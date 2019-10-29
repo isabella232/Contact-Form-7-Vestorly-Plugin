@@ -18,6 +18,7 @@ function wpcf7_vestorly_uninstall() {
         'publisher_id' => '',
         'auth_token' => '',
         'email_tag' => 'your-email',
+        'name_tag' => 'your-name',
     ));
 }
 add_action( 'wpcf7_init', 'wpcf7_vestorly_integration_register_service');
@@ -65,7 +66,6 @@ class WPCF7_Vestorly extends WPCF7_Service {
     const service_name = 'vestorly';
 
     private static $instance;
-    protected $publisher_id;
 
     public static function get_instance() {
         if ( empty( self::$instance ) ) {
@@ -95,6 +95,12 @@ class WPCF7_Vestorly extends WPCF7_Service {
         } else {
             $this->email_tag = 'your-email';
         }
+
+        if ( isset( $option['name_tag'] ) ) {
+            $this->name_tag = $option['name_tag'];
+        } else {
+            $this->name_tag = 'your-name';
+        }
     }
     
     public function is_active() {
@@ -107,6 +113,7 @@ class WPCF7_Vestorly extends WPCF7_Service {
                 'auth_token' => $this->auth_token,
                 'publisher_id' => $this->publisher_id,
                 'email_tag' => $this->email_tag,
+                'name_tag' => $this->name_tag,
             )
         );
 
@@ -166,6 +173,8 @@ class WPCF7_Vestorly extends WPCF7_Service {
                     ? trim ( $_POST['publisher_id'] ) : '';
                 $this->email_tag = isset( $_POST['email_tag'] )
                     ? trim ( $_POST['email_tag'] ) : '';
+                $this->name_tag = isset( $_POST['name_tag'] )
+                    ? trim ( $_POST['name_tag'] ) : '';
                 $this->save_data();
             }
 
@@ -197,16 +206,16 @@ class WPCF7_Vestorly extends WPCF7_Service {
 
         $user_info = array(
             'username' => $form_data[$this->email_tag],
+            'member' => array(
+                'email' => $form_data[$this->email_tag],
+            ),
         );
 
-        if ( isset( $form_data['your-name'] ) ) {
-            $member = array();
-            $name = trim( $form_data['your-name'] );
+        if ( isset( $form_data[$this->name_tag] ) ) {
+            $name = trim( $form_data[$this->name_tag] );
             $parts = explode( " ", $name );
-            $member['email'] = $form_data[$this->email_tag];
-            $member['last_name'] = array_pop( $parts );
-            $member['first_name'] = implode( " ", $parts );
-            $user_info['member'] = $member;
+            $user_info['member']['last_name'] = array_pop( $parts );
+            $user_info['member']['first_name'] = implode( " ", $parts );
         }
         return $user_info;
     }
@@ -349,11 +358,20 @@ class WPCF7_Vestorly extends WPCF7_Service {
     ?></td>
 </tr>
 <tr>
-    <th scope="row"><label for="email_tag"><?php echo esc_html( __( 'Email Tag Name', 'contact-form-7' ) ); ?></label></th>
+    <th scope="row"><label for="email_tag"><?php echo esc_html( __( 'Contact Email Tag', 'contact-form-7' ) ); ?></label></th>
     <td><?php
         echo sprintf(
             '<input type="text" aria-required="true" value="%1$s" id="email_tag" name="email_tag" class="regular-text code" />', 
             esc_attr( $this->email_tag )
+        );   
+    ?></td>
+</tr>
+<tr>
+    <th scope="row"><label for="name_tag"><?php echo esc_html( __( 'Contact Name Tag', 'contact-form-7' ) ); ?></label></th>
+    <td><?php
+        echo sprintf(
+            '<input type="text" aria-required="true" value="%1$s" id="name_tag" name="name_tag" class="regular-text code" />', 
+            esc_attr( $this->name_tag )
         );   
     ?></td>
 </tr>

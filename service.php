@@ -11,7 +11,15 @@ if ( !defined('WP_VESTORLY_INT_VER') ) {
     define('WP_VESTORLY_INT_VER', '0.1.0' );
 }
 
+register_uninstall_hook( __FILE__, 'wpcf7_vestorly_uninstall' );
 
+function wpcf7_vestorly_uninstall() {
+    WPCF7::update_option('vestorly', array(
+        'publisher_id' => '',
+        'auth_token' => '',
+        'email_tag' => 'your-email',
+    ));
+}
 add_action( 'wpcf7_init', 'wpcf7_vestorly_integration_register_service');
 
 function wpcf7_vestorly_integration_register_service() {

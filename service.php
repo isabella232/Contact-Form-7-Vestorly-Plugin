@@ -123,6 +123,14 @@ class WPCF7_Vestorly extends WPCF7_Service {
         return 'Vestorly';
     }
 
+    public function link() {
+        echo sprintf( '<a href="%1$s">%2$s</a>',
+            'https://www.vestorly.com',
+            'vestorly.com'
+        );
+    }
+
+
     public function get_categories() {
         return array( 'email_marketing' );
     }
@@ -271,13 +279,13 @@ class WPCF7_Vestorly extends WPCF7_Service {
 
     public function display( $action = '' ) {
 		echo '<p>' . sprintf(
-			esc_html( __( 'Test description of Vestorly Integration and a link %s', 'contact-form-7' ) ),
+			esc_html( __( 'The Vestorly integration module allows you to upload contact data collected from your contact forms to the Vestorly API. You can view your uploaded contact data on the Vestorly %s.', 'contact-form-7' ) ),
 			wpcf7_link(
 				__(
 					'https://www.vestorly.com',
 					'contact-form-7'
 				),
-				__( 'here', 'contact-form-7' )
+				__( 'website', 'contact-form-7' )
 			)
 		) . '</p>';
 

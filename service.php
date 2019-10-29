@@ -106,6 +106,7 @@ class WPCF7_Vestorly extends WPCF7_Service {
     public function is_active() {
         return $this->auth_token != '' && $this->publisher_id != '';
     }
+
     protected function save_data() {
         $option = array_merge(
             (array) WPCF7::get_option( self::service_name ),
@@ -211,12 +212,26 @@ class WPCF7_Vestorly extends WPCF7_Service {
             ),
         );
 
-        if ( isset( $form_data[$this->name_tag] ) ) {
+        // Name tag may be two tags separated by commas if user has
+        // separate inputs for first and last name
+        $split_tag = explode( ',', $this->name_tag );
+        if ( 
+            ((count($split_tag)) === 1 ) 
+            && ( isset( $form_data[$this->name_tag])) 
+        ) {
             $name = trim( $form_data[$this->name_tag] );
             $parts = explode( " ", $name );
             $user_info['member']['last_name'] = array_pop( $parts );
             $user_info['member']['first_name'] = implode( " ", $parts );
+        } elseif ( ( count ( $split_tag ) ) === 2 ) {
+            $user_info['member']['last_name'] = array_key_exists(
+                $split_tag[1], $form_data
+            ) ? $form_data[$split_tag[1]] : '';
+            $user_info['member']['first_name'] = array_key_exists(
+                $split_tag[0], $form_data
+            ) ? $form_data[$split_tag[0]] : '';
         }
+
         return $user_info;
     }
 
@@ -373,7 +388,9 @@ class WPCF7_Vestorly extends WPCF7_Service {
             '<input type="text" aria-required="true" value="%1$s" id="name_tag" name="name_tag" class="regular-text code" />', 
             esc_attr( $this->name_tag )
         );   
-    ?></td>
+    ?>
+    <p class="description"><?php echo esc_html( __( 'If you have separate tags for first name and last name, separate them by commas like so: first_name_tag,last_name_tag', 'contact-form-7' ) ); ?>
+    </td>
 </tr>
 </tbody>
 </table>

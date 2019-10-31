@@ -171,15 +171,28 @@ class WPCF7_Vestorly extends WPCF7_Service {
                 $this->reset_data();
             } else {
                 $this->auth_token = isset ( $_POST['auth_token'] )
-                    ? trim ( $_POST['auth_token'] ) : '';
+                    ? sanitize_text_field ( $_POST['auth_token'] ) : '';
                 $this->publisher_id = isset( $_POST['publisher_id'] )
-                    ? trim ( $_POST['publisher_id'] ) : '';
+                    ? sanitize_text_field ( $_POST['publisher_id'] ) : '';
                 $this->email_tag = isset( $_POST['email_tag'] )
-                    ? trim ( $_POST['email_tag'] ) : '';
-                $this->name_tag = isset( $_POST['name_tag'] )
-                    ? trim ( $_POST['name_tag'] ) : '';
-                $this->save_data();
+                    ? sanitize_text_field ( $_POST['email_tag'] ) : '';
             }
+            if ( isset( $_POST['name_tag']) ) {
+                $sanitized_tag = sanitize_text_field($_POST['name_tag']);
+                if ( substr_count ( $sanitized_tag , ',' ) > 1 ) {
+                    wp_safe_redirect( $this->menu_page_url(
+                        array(
+                            'action' => 'setup',
+                            'message' => 'config_error',
+                        )
+                    ) );
+                } else {
+                    $this->name_tag = $sanitized_tag;
+                }
+            } else {
+                $this->name_tag = '';
+            }
+            $this->save_data();
 
             wp_safe_redirect( $this->menu_page_url( 'action=setup' ) );
             exit();
@@ -293,6 +306,13 @@ class WPCF7_Vestorly extends WPCF7_Service {
 					'<div class="error notice notice-error is-dismissible"><p><strong>%1$s</strong>: %2$s</p></div>',
 					esc_html( __( "ERROR", 'vestorly-form-7' ) ),
 					esc_html( __( "Failed to establish connection. Please double-check your configuration.", 'vestorly-form-7' ) )
+				);
+				break;
+            case 'config_error':
+				echo sprintf(
+					'<div class="error notice notice-error is-dismissible"><p><strong>%1$s</strong>: %2$s</p></div>',
+					esc_html( __( "ERROR", 'vestorly-form-7' ) ),
+					esc_html( __( "Failed to get name of user name tag. Please double-check your configuration.", 'vestorly-form-7' ) )
 				);
 				break;
 			case 'updated':

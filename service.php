@@ -13,6 +13,19 @@ if ( !defined('WP_VESTORLY_INT_VER') ) {
     define('WP_VESTORLY_INT_VER', '0.1.0' );
 }
 
+register_activation_hook(__FILE__, 'wpcf7_vestorly_check_dependency');
+
+function wpcf7_vestorly_check_dependency() {
+    if (!file_exists(WP_PLUGIN_DIR.'/contact-form-7/wp-contact-form-7.php')) {
+        deactivate_plugins( __FILE__ );
+        $error_message = '<div id="message" class="error"><p>';
+        $error_message .= __('The Contact Form 7 must be installed for the <b>Vestorly Integration</b> to work.');
+        $error_message .= '</p></div>';
+        $error_message = esc_html( $error_message );
+        echo $error_message;
+    } 
+}
+
 register_uninstall_hook( __FILE__, 'wpcf7_vestorly_uninstall' );
 
 function wpcf7_vestorly_uninstall() {

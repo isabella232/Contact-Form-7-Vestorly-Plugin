@@ -1,9 +1,11 @@
 <?php
 /**
  * Plugin Name: Vestorly Contact Form 7 Integration
- * Plugin URI: http://www.vestorly.com
  * Description: A plugin to integrate Vestorly with Contact Form 7
  * Author: Vestorly
+ * Author URI: https://www.vestorly.com
+ * Text Domain: vestorly-form-7
+ * Version: 0.1.0
  */
 
 defined( 'ABSPATH' ) or die( 'Vestorly Contact Form 7 Integration can only execute as part of Wordpress' );

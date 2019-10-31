@@ -26,7 +26,7 @@ add_action( 'wpcf7_init', 'wpcf7_vestorly_integration_register_service');
 function wpcf7_vestorly_integration_register_service() {
     $integration = WPCF7_Integration::get_instance();
     $integration->add_category( 'email_marketing',
-        __( 'Email Marketing', 'contact-form-7' ) );
+        __( 'Email Marketing', 'vestorly-form-7' ) );
 
     $service = WPCF7_Vestorly::get_instance();
     $integration->add_service( 'vestorly', $service );
@@ -283,20 +283,20 @@ class WPCF7_Vestorly extends WPCF7_Service {
 			case 'success':
 				echo sprintf(
 					'<div class="updated notice notice-success is-dismissible"><p>%s</p></div>',
-					esc_html( __( "Connection established.", 'contact-form-7' ) )
+					esc_html( __( "Connection established.", 'vestorly-form-7' ) )
 				);
 				break;
 			case 'failed':
 				echo sprintf(
 					'<div class="error notice notice-error is-dismissible"><p><strong>%1$s</strong>: %2$s</p></div>',
-					esc_html( __( "ERROR", 'contact-form-7' ) ),
-					esc_html( __( "Failed to establish connection. Please double-check your configuration.", 'contact-form-7' ) )
+					esc_html( __( "ERROR", 'vestorly-form-7' ) ),
+					esc_html( __( "Failed to establish connection. Please double-check your configuration.", 'vestorly-form-7' ) )
 				);
 				break;
 			case 'updated':
 				echo sprintf(
 					'<div class="updated notice notice-success is-dismissible"><p>%s</p></div>',
-					esc_html( __( "Configuration updated.", 'contact-form-7' ) )
+					esc_html( __( "Configuration updated.", 'vestorly-form-7' ) )
 				);
 				break;
 		}
@@ -304,20 +304,20 @@ class WPCF7_Vestorly extends WPCF7_Service {
 
     public function display( $action = '' ) {
 		echo '<p>' . sprintf(
-			esc_html( __( 'The Vestorly integration module allows you to upload contact data collected from your contact forms to the Vestorly API. You can view your uploaded contact data on the Vestorly %s.', 'contact-form-7' ) ),
+			esc_html( __( 'The Vestorly integration module allows you to upload contact data collected from your contact forms to the Vestorly API. You can view your uploaded contact data on the Vestorly %s.', 'vestorly-form-7' ) ),
 			wpcf7_link(
 				__(
 					'https://www.vestorly.com',
-					'contact-form-7'
+					'vestorly-form-7'
 				),
-				__( 'website', 'contact-form-7' )
+				__( 'website', 'vestorly-form-7' )
 			)
 		) . '</p>';
 
 		if ( $this->is_active() ) {
 			echo sprintf(
 				'<p class="dashicons-before dashicons-yes">%s</p>',
-				esc_html( __( "This site is connected to the Vestorly API.", 'contact-form-7' ) )
+				esc_html( __( "This site is connected to the Vestorly API.", 'vestorly-form-7' ) )
 			);
 		}
 
@@ -327,7 +327,7 @@ class WPCF7_Vestorly extends WPCF7_Service {
 			echo sprintf(
 				'<p><a href="%1$s" class="button">%2$s</a></p>',
 				esc_url( $this->menu_page_url( 'action=setup' ) ),
-				esc_html( __( 'Setup Integration', 'contact-form-7' ) )
+				esc_html( __( 'Setup Integration', 'vestorly-form-7' ) )
 			);
 		}
     }
@@ -339,10 +339,10 @@ class WPCF7_Vestorly extends WPCF7_Service {
 <table class="form-table">
 <tbody>
 <tr>
-	<th scope="row"><label for="auth_token"><?php echo esc_html( __( 'Auth Token', 'contact-form-7' ) ); ?></label></th>
+	<th scope="row"><label for="auth_token"><?php echo esc_html( __( 'Auth Token', 'vestorly-form-7' ) ); ?></label></th>
 	<td><?php
 		if ( $this->is_active() ) {
-            echo esc_html( __('Your token is set', 'contact-form-7' ) );
+            echo esc_html( __('Your token is set', 'vestorly-form-7' ) );
 			echo sprintf(
 				'<input type="hidden" value="%1$s" required id="auth_token" name="auth_token" />',
 				esc_attr( $this->auth_token )
@@ -356,7 +356,7 @@ class WPCF7_Vestorly extends WPCF7_Service {
 	?></td>
 </tr>
 <tr>
-    <th scope="row"><label for="publisher_id"><?php echo esc_html( __( 'Publisher ID', 'contact-form-7' ) ); ?></label></th>
+    <th scope="row"><label for="publisher_id"><?php echo esc_html( __( 'Publisher ID', 'vestorly-form-7' ) ); ?></label></th>
     <td><?php
         if ( $this->is_active() ) {
             echo esc_html( $this->publisher_id );
@@ -373,7 +373,7 @@ class WPCF7_Vestorly extends WPCF7_Service {
     ?></td>
 </tr>
 <tr>
-    <th scope="row"><label for="email_tag"><?php echo esc_html( __( 'Contact Email Tag', 'contact-form-7' ) ); ?></label></th>
+    <th scope="row"><label for="email_tag"><?php echo esc_html( __( 'Contact Email Tag', 'vestorly-form-7' ) ); ?></label></th>
     <td><?php
         echo sprintf(
             '<input type="text" aria-required="true" value="%1$s" id="email_tag" name="email_tag" class="regular-text code" />', 
@@ -382,14 +382,14 @@ class WPCF7_Vestorly extends WPCF7_Service {
     ?></td>
 </tr>
 <tr>
-    <th scope="row"><label for="name_tag"><?php echo esc_html( __( 'Contact Name Tag', 'contact-form-7' ) ); ?></label></th>
+    <th scope="row"><label for="name_tag"><?php echo esc_html( __( 'Contact Name Tag', 'vestorly-form-7' ) ); ?></label></th>
     <td><?php
         echo sprintf(
             '<input type="text" aria-required="true" value="%1$s" id="name_tag" name="name_tag" class="regular-text code" />', 
             esc_attr( $this->name_tag )
         );   
     ?>
-    <p class="description"><?php echo esc_html( __( 'If you have separate tags for first name and last name, separate them by commas like so: first_name_tag,last_name_tag', 'contact-form-7' ) ); ?>
+    <p class="description"><?php echo esc_html( __( 'If you have separate tags for first name and last name, separate them by commas like so: first_name_tag,last_name_tag', 'vestorly-form-7' ) ); ?>
     </td>
 </tr>
 </tbody>
@@ -397,13 +397,13 @@ class WPCF7_Vestorly extends WPCF7_Service {
 <?php
     if ( $this->is_active() ) {
         submit_button(
-            _x( 'Reset Token', 'API keys', 'contact-form-7' ),
+            _x( 'Reset Token', 'API keys', 'vestorly-form-7' ),
             'small', 'reset'
         );
 	}
 
     submit_button(
-        __( 'Save', 'contact-form-7' )
+        __( 'Save', 'vestorly-form-7' )
     );
 ?>
 </form>

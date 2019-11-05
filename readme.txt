@@ -6,11 +6,14 @@ Tested up to: 5.2.4
 Requires PHP: 5.6.20
 License: GPLv2
 License URI: https://opensource.org/licenses/GPL-2.0
-
+Stable tag: trunk
 Provides an integration with the Vestorly API for the Contact Form 7 Plugin.
 
 == Description ==
 Plugin to integrate [Contact Form 7](https://contactform7.com/) with Vestorly. For more information about Vestorly, visit [our website](https://www.vestorly.com). For support, contact support@vestorly.com.
+
+== Frequently Asked Questions == 
+Please direct all questions to support@vestorly.com
 
 == Installation ==
 1. Ensure Contact Form 7 is installed and activated.

@@ -188,7 +188,8 @@ class WPCF7_Vestorly extends WPCF7_Service {
                 $this->reset_data();
             } else {
                 $this->auth_token = isset ( $_POST['auth_token'] )
-                    ? sanitize_text_field ( $_POST['auth_token'] ) : '';
+                    // Sanitize removes necessary characters for the token
+                    ? trim ( $_POST['auth_token'] ) : '';
                 $this->publisher_id = isset( $_POST['publisher_id'] )
                     ? sanitize_text_field ( $_POST['publisher_id'] ) : '';
                 $this->email_tag = isset( $_POST['email_tag'] )

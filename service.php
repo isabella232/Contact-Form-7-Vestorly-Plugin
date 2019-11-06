@@ -161,6 +161,10 @@ class WPCF7_Vestorly extends WPCF7_Service {
     public function icon() {
     }
 
+    protected function log( $url, $request, $response ) {
+        wpcf7_log_remote_request( $url, $request, $response );
+    }
+
     protected function menu_page_url( $args = '' ) {
         $args = wp_parse_args( $args, array() );
 

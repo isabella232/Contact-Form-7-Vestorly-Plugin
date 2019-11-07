@@ -13,6 +13,11 @@ if ( !defined('WP_VESTORLY_INT_VER') ) {
     define('WP_VESTORLY_INT_VER', '0.1.0' );
 }
 
+/* Issues can occur with Wordpress not detecting Contact Form 7 when
+ * the integration is loaded, this makes sure we don't break the users
+ * website to the point where they have to delete the plugin from their
+ * server filesystem.
+ */
 register_activation_hook(__FILE__, 'wpcf7_vestorly_check_dependency');
 
 function wpcf7_vestorly_check_dependency() {
@@ -76,7 +81,7 @@ function wpcf7_vestorly_submit( $contact_form, $result ) {
     $service->upload_contact($data);
 }
 
-# Extend WPCF7_Service_OAuth2 once OAuth wanted
+// Extend WPCF7_Service_OAuth2 once OAuth wanted
 class WPCF7_Vestorly extends WPCF7_Service {
     const service_name = 'vestorly';
 

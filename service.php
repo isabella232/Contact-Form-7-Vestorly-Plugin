@@ -344,13 +344,13 @@ class WPCF7_Vestorly extends WPCF7_Service {
 
     public function display( $action = '' ) {
 		echo '<p>' . sprintf(
-			esc_html( __( 'The Vestorly integration module allows you to upload contact data collected from your contact forms to the Vestorly API. You can view your uploaded contact data on the Vestorly %s.', 'vestorly-form-7' ) ),
+			esc_html( __( 'The Vestorly integration module allows you to upload contact data collected from your contact forms to the Vestorly API. You can view your uploaded contact data within the Vestorly %s.', 'vestorly-form-7' ) ),
 			wpcf7_link(
 				__(
 					'https://www.vestorly.com',
 					'vestorly-form-7'
 				),
-				__( 'website', 'vestorly-form-7' )
+				__( 'application', 'vestorly-form-7' )
 			)
 		) . '</p>';
 
@@ -393,7 +393,10 @@ class WPCF7_Vestorly extends WPCF7_Service {
 				esc_attr( $this->auth_token)
 			);
 		}
-	?></td>
+?>
+
+    <p class="description"><?php echo esc_html( __( 'Please contact your Vestorly Customer Success representative to receive your Auth Token and Publisher ID.', 'vestorly-form-7' ) ); ?> </p>
+</td>
 </tr>
 <tr>
     <th scope="row"><label for="publisher_id"><?php echo esc_html( __( 'Publisher ID', 'vestorly-form-7' ) ); ?></label></th>
@@ -429,7 +432,7 @@ class WPCF7_Vestorly extends WPCF7_Service {
             esc_attr( $this->name_tag )
         );   
     ?>
-    <p class="description"><?php echo esc_html( __( 'If you have separate tags for first name and last name, separate them by commas like so: first_name_tag,last_name_tag', 'vestorly-form-7' ) ); ?>
+    <p class="description"><?php echo esc_html( __( 'If you have separate tags for first name and last name, separate them by commas like so: first_name_tag,last_name_tag', 'vestorly-form-7' ) ); ?> </p>
     </td>
 </tr>
 </tbody>

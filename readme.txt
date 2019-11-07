@@ -18,9 +18,9 @@ Please direct all questions to support@vestorly.com
 == Installation ==
 1. Ensure Contact Form 7 is installed and activated.
 2. Upload the entire `Contact-Form-7-Vestorly-Plugin` folder to the `/wp-content/plugins/` directory.
-3. Activate the plugin through the \'Plugins\' menu in WordPress.	
-4. Hover over the \"Contact\" menu item in your admin panel and click on Integrations.
-5. In the Contact Form 7 Integrations menu, click on \"Setup Integration\"
+3. Activate the plugin through the 'Plugins' menu in WordPress.	
+4. Hover over the 'Contact' menu item in your admin panel and click on Integrations.
+5. In the Contact Form 7 Integrations menu, click on 'Setup Integration'
 
 == Changelog ==
 = 0.1.0 =

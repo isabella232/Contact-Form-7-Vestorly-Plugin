@@ -20,6 +20,10 @@ if ( !defined('WP_VESTORLY_INT_VER') ) {
  */
 register_activation_hook(__FILE__, 'wpcf7_vestorly_check_dependency');
 
+// const DEBUG_BASE_URL = 'https://api.oodadev.com';
+const DEBUG_BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'https://api.vestorly.com';
+
 function wpcf7_vestorly_check_dependency() {
     if (!file_exists(WP_PLUGIN_DIR.'/contact-form-7/wp-contact-form-7.php')) {
         deactivate_plugins( __FILE__ );
@@ -81,9 +85,20 @@ function wpcf7_vestorly_submit( $contact_form, $result ) {
     $service->upload_contact($data);
 }
 
+add_action( 'wpcf7_log_remote_request', 'log_to_debug_filter' );
+
+function log_to_debug_filter( $log ) {
+    error_log( $log );
+}
+if ( ! class_exists( 'WPCF7_Service_OAuth2' ) ) {
+    return;
+}
+
 // Extend WPCF7_Service_OAuth2 once OAuth wanted
-class WPCF7_Vestorly extends WPCF7_Service {
+class WPCF7_Vestorly extends WPCF7_Service_OAuth2 {
     const service_name = 'vestorly';
+    const authorization_endpoint = 'https://api.vestorly.com/oauth/authorize';
+    const token_endpoint = 'https://api.vestorly.com/oauth/token';
 
     private static $instance;
 
@@ -95,15 +110,31 @@ class WPCF7_Vestorly extends WPCF7_Service {
     }
 
     private function __construct() {
-
+        if ( WP_DEBUG ) {
+            $this->authorization_endpoint = sprintf( '%s/oauth/authorize',
+                DEBUG_BASE_URL );
+            $this->token_endpoint = sprintf( '%s/oauth/token',
+                DEBUG_BASE_URL );
+        } else {
+            $this->authorization_endpoint = self::authorization_endpoint;
+            $this->token_endpoint = self::token_endpoint;
+        }
+        
         $option = (array) WPCF7::get_option( self::service_name );
         
-        if ( isset( $option['auth_token'] ) ) {
-            $this->auth_token = $option['auth_token'];
-        } else {
-            $this->auth_token = '';
+        if ( isset ( $option['client_id'] ) ) {
+            $this->client_id = $option['client_id'];
         }
-
+        if ( isset( $option['client_secret'] ) ) {
+            $this->client_secret = $option['client_secret'];
+        }
+        if ( isset ( $option['access_token'] ) ) {
+            $this->access_token = $option['access_token'];
+        }
+        if ( isset ( $option['refresh_token'] ) ) {
+            $this->refresh_token = $option['refresh_token'];
+        }
+        
         if ( isset( $option['publisher_id'] ) ) {
             $this->publisher_id = $option['publisher_id'];
         } else {
@@ -121,17 +152,37 @@ class WPCF7_Vestorly extends WPCF7_Service {
         } else {
             $this->name_tag = 'your-name';
         }
-    }
-    
-    public function is_active() {
-        return $this->auth_token != '' && $this->publisher_id != '';
+
+        add_action( 'wpcf7_admin_init', array( $this, 'auth_redirect' ) );
     }
 
+    public function auth_redirect() {
+        $auth = isset( $_GET['auth'] ) ? trim( $_GET['auth'] ) : ''; 
+        $code = isset( $_GET['code'] ) ? trim( $_GET['code'] ) : '';
+
+        if ( self::service_name === $auth and $code
+        and current_user_can( 'wpcf7_manage_integration' ) ) {
+            $redirect_to = add_query_arg(
+                array(
+                    'service' => self::service_name,
+                    'action' => 'auth_redirect',
+                    'code' => $code,
+                ),
+                menu_page_url( 'wpcf7-integration', false )
+            );
+            wp_safe_redirect( $redirect_to );
+            exit();
+        }
+    }
+ 
     protected function save_data() {
         $option = array_merge(
             (array) WPCF7::get_option( self::service_name ),
             array(
-                'auth_token' => $this->auth_token,
+                'client_id' => $this->client_id,
+                'client_secret' => $this->client_secret,
+                'access_token' => $this->access_token,
+                'refresh_token' => $this->refresh_token,
                 'publisher_id' => $this->publisher_id,
                 'email_tag' => $this->email_tag,
                 'name_tag' => $this->name_tag,
@@ -142,9 +193,16 @@ class WPCF7_Vestorly extends WPCF7_Service {
     }
 
     protected function reset_data() {
-        $this->auth_token = '';
+        $this->client_id = '';
+        $this->client_secret = '';
+        $this->access_token = '';
+        $this->refresh_token = '';
         $this->publisher_id = '';
         $this->save_data();
+    }
+
+    protected function get_redirect_uri() {
+        return admin_url( '/?auth=' . self::service_name );
     }
 
     public function get_title() {
@@ -192,30 +250,30 @@ class WPCF7_Vestorly extends WPCF7_Service {
             if ( ! empty( $_POST['reset'] ) ) {
                 $this->reset_data();
             } else {
-                $this->auth_token = isset ( $_POST['auth_token'] )
-                    // Sanitize removes necessary characters for the token
-                    ? trim ( $_POST['auth_token'] ) : '';
-                $this->publisher_id = isset( $_POST['publisher_id'] )
-                    ? sanitize_text_field ( $_POST['publisher_id'] ) : '';
+                $this->client_id = isset( $_POST['client_id'] )
+                    ? sanitize_text_field ( $_POST['client_id'] ) : '';
+                $this->client_secret = isset( $_POST['client_secret'] )
+                    ? sanitize_text_field ( $_POST['client_secret'] ) : '';
                 $this->email_tag = isset( $_POST['email_tag'] )
                     ? sanitize_text_field ( $_POST['email_tag'] ) : '';
-            }
-            if ( isset( $_POST['name_tag']) ) {
-                $sanitized_tag = sanitize_text_field($_POST['name_tag']);
-                if ( substr_count ( $sanitized_tag , ',' ) > 1 ) {
-                    wp_safe_redirect( $this->menu_page_url(
-                        array(
-                            'action' => 'setup',
-                            'message' => 'config_error',
-                        )
-                    ) );
+                if ( isset( $_POST['name_tag']) ) {
+                    $sanitized_tag = sanitize_text_field($_POST['name_tag']);
+                    if ( substr_count ( $sanitized_tag , ',' ) > 1 ) {
+                        wp_safe_redirect( $this->menu_page_url(
+                            array(
+                                'action' => 'setup',
+                                'message' => 'config_error',
+                            )
+                        ) );
+                    } else {
+                        $this->name_tag = $sanitized_tag;
+                    }
                 } else {
-                    $this->name_tag = $sanitized_tag;
+                    $this->name_tag = '';
                 }
-            } else {
-                $this->name_tag = '';
+                $this->save_data();
+                $this->authorize();
             }
-            $this->save_data();
 
             wp_safe_redirect( $this->menu_page_url( 'action=setup' ) );
             exit();
@@ -275,9 +333,9 @@ class WPCF7_Vestorly extends WPCF7_Service {
 
     public function upload_contact(array $post_data) {
         if ( WP_DEBUG ) {
-            $endpoint = 'https://api.oodadev.com/api/v2/members';
+            $endpoint = sprintf( "%s/api/v2/members", DEBUG_BASE_URL );
         } else {
-            $endpoint = 'https://api.vestorly.com/api/v2/members';
+            $endpoint = sprintf( "%s/api/v2/members", BASE_URL );
         }
 
         $post_data['publisher_id'] = $this->publisher_id;
@@ -301,20 +359,6 @@ class WPCF7_Vestorly extends WPCF7_Service {
         }
     }
 
-    protected function remote_request( $url, $request = array() ) {
-        $request = wp_parse_args( $request, array() );
-
-        $request['headers'] = array_merge(
-            $request['headers'],
-            array(
-                'X-Vestorly-Auth' => $this->auth_token,
-            )
-        );
-
-        $response = wp_remote_request( esc_url_raw( $url ), $request );
-
-        return $response;
-    }
 
     public function admin_notice( $message = '' ) {
 		switch ( $message ) {
@@ -384,38 +428,36 @@ class WPCF7_Vestorly extends WPCF7_Service {
 <table class="form-table">
 <tbody>
 <tr>
-	<th scope="row"><label for="auth_token"><?php echo esc_html( __( 'Auth Token', 'vestorly-form-7' ) ); ?></label></th>
+	<th scope="row"><label for="client_id"><?php echo esc_html( __( 'API Client ID', 'vestorly-form-7' ) ); ?></label></th>
 	<td><?php
 		if ( $this->is_active() ) {
-            echo esc_html( __('Your token is set', 'vestorly-form-7' ) );
+            echo esc_html( $this->client_id );
 			echo sprintf(
-				'<input type="hidden" value="%1$s" required id="auth_token" name="auth_token" />',
-				esc_attr( $this->auth_token )
+				'<input type="hidden" value="%1$s" required id="client_id" name="client_id" />',
+				esc_attr( $this->client_id )
 			);
 		} else {
 			echo sprintf(
-				'<input type="text" aria-required="true" required value="%1$s" id="auth_token" name="auth_token" class="regular-text code" />',
-				esc_attr( $this->auth_token)
+				'<input type="text" aria-required="true" required value="%1$s" id="client_id" name="client_id" class="regular-text code" />',
+				esc_attr( $this->client_id )
 			);
 		}
-?>
-
-    <p class="description"><?php echo esc_html( __( 'Please contact your Vestorly Customer Success representative to receive your Auth Token and Publisher ID.', 'vestorly-form-7' ) ); ?> </p>
-</td>
+    ?>
+    </td>
 </tr>
 <tr>
-    <th scope="row"><label for="publisher_id"><?php echo esc_html( __( 'Publisher ID', 'vestorly-form-7' ) ); ?></label></th>
+    <th scope="row"><label for="client_secret"><?php echo esc_html( __( 'API Client Secret', 'vestorly-form-7' ) ); ?></label></th>
     <td><?php
         if ( $this->is_active() ) {
-            echo esc_html( $this->publisher_id );
+            echo esc_html( wpcf7_mask_password( $this->client_secret ) );
             echo sprintf(
-                '<input type="hidden" required value="%1$s" id="publisher_id" name="publisher_id" />',
-                esc_attr( $this->publisher_id )
+                '<input type="hidden" required value="%1$s" id="client_secret" name="client_secret" />',
+                esc_attr( $this->client_secret )
             );
         } else {
             echo sprintf(
-                '<input type="text" aria-required="true" required value="%1$s" id="publisher_id" name="publisher_id" class="regular-text code" />',
-                esc_attr( $this->publisher_id )
+                '<input type="text" aria-required="true" required value="%1$s" id="client_secret" name="client_secret" class="regular-text code" />',
+                esc_attr( $this->client_secret )
             );
         }
     ?></td>
@@ -455,8 +497,6 @@ class WPCF7_Vestorly extends WPCF7_Service {
     );
 ?>
 </form>
-
-
 <?php
 	}
 }
